@@ -1,0 +1,28 @@
+CREATE DATABASE DbPrectica1
+GO 
+USE DbPrectica1
+GO 
+
+CREATE TABLE Marca(
+Id INT NOT NULL PRIMARY KEY IDENTITY (1,1),
+Nombre VARCHAR (100) NOT NULL
+)
+GO
+
+CREATE TABLE Producto(
+[Id] INT NOT NULL PRIMARY KEY IDENTITY (1,1),
+[IdMarca] INT NOT NULL,
+[Codigo] VARCHAR (10) NOT NULL,
+[Descripcion] VARCHAR (200) NOT NULL,
+[PrecioVenta] DECIMAL (8,2) NOT NULL,
+[Comentario] VARCHAR (200),
+[FechaRegistro] DATETIME NOT NULL,
+
+FOREIGN KEY (IdMarca) REFERENCES Marca(Id)
+)
+GO
+
+INSERT INTO Marca(Nombre, Estado) 
+VALUES ('HP', 1),
+		('ACER', 1)
+GO
