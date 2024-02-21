@@ -207,5 +207,26 @@ namespace SysSeguridadG05.DAL
             }
             return usuario;
         }
+
+        public static async Task<int> CambiarPasswordAsync(Usuario pUsuario, string pPasswordAnt)
+        {
+            int result = 0;
+            var usuarioPassAnt = new Usuario { Password = pPasswordAnt };
+            EncriptarMD5(usuarioPassAnt);
+            using (var dbContexto = new DBContexto())
+            {
+                var usuario = await dbContexto.Usuarios.FirstOrDefaultAsync(s => s.Id == pUsuario.Id);
+                if (usuarioPassAnt.Password == usuario.Password)
+                {
+                    EncriptarMD5(pUsuario);
+                    usuario.Password = usuarioPassAnt.Password;
+                    dbContexto.Update(usuario);
+                    result = await dbContexto.SaveChangesAsync();
+                }
+                else
+                    throw new Exception("El password actual es incorrecto");
+            }
+            return result;
+        }
     }
 }
