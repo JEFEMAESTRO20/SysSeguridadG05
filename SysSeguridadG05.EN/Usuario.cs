@@ -32,7 +32,7 @@ namespace SysSeguridadG05.EN
         [StringLength(32, ErrorMessage = "El Password debe tener entre 5 y 32 Caracteres")]
         public string Password { get; set; }
         [Required(ErrorMessage ="Estatus es Obligatorio")]
-        public byte Status { get; set; }
+        public byte Estatus { get; set; }
         [Display(Name = "Fecha de Registro")]
         public DateTime FechaRegistro { get; set; }
         public Rol Rol { get; set; }
@@ -45,6 +45,10 @@ namespace SysSeguridadG05.EN
         [Compare("Password", ErrorMessage ="Password y confirmar password deben ser igales")]
         [Display(Name ="Confirmar Password")]
         public string ConfirmPassword_Aux { get; set; }
-
+    }
+    public enum Estatus_Usuario
+    {
+        ACTIVO = 1,
+        INACTIVO = 2
     }
 }
