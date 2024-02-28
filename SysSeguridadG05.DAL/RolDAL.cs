@@ -63,7 +63,7 @@ namespace SysSeguridadG05.DAL
             return rol;
         }
 
-        public static async Task<List<Rol>> ObtenerTodosAsync(Rol pRol)
+        public static async Task<List<Rol>> ObtenerTodosAsync()
         {
             List<Rol> roles = new List<Rol>();
             using (var dbContexto = new DBContexto())
