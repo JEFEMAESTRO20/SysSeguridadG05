@@ -129,7 +129,7 @@ namespace SysSeguridadG05.DAL
             }
             return usuario;
         }
-        public static async Task<List<Usuario>> ObtenerTodosAsync(Usuario pUsuario)
+        public static async Task<List<Usuario>> ObtenerTodosAsync()
         {
             List<Usuario> usuarios = new List<Usuario>();
             try
