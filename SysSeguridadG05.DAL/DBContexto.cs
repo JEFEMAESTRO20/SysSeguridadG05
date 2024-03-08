@@ -12,10 +12,10 @@ namespace SysSeguridadG05.DAL
     public class DBContexto : DbContext
     {
         public DbSet<Rol> Rol { get; set; }
-        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Usuario> Usuario { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"");
+            optionsBuilder.UseSqlServer(@"Data Source=DESKTOP-NFDMETJ;Initial Catalog=DBSeguridadG05;Integrated Security=True");
         }
     }
 }

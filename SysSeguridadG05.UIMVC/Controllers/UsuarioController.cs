@@ -1,14 +1,31 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+//****************************
+using SysSeguridadG05.EN;
+using SysSeguridadG05.BL;
 
 namespace SysSeguridadG05.UIMVC.Controllers
 {
     public class UsuarioController : Controller
     {
+        UsuarioBL usuarioBl = new UsuarioBL();
+        RolBL rolBl = new RolBL();
         // GET: UsuarioController
-        public ActionResult Index()
+        public async Task<ActionResult> Index(Usuario pUsuario= null)
         {
-            return View();
+            if (pUsuario == null)
+                pUsuario = new Usuario();
+            if (pUsuario.Top_Aux == 0)
+                pUsuario.Top_Aux = 10;
+            else
+                if (pUsuario.Top_Aux == -1)
+                pUsuario.Top_Aux = 0;
+            var tasBuscar = usuarioBl.BuscarIncluirRolAsync(pUsuario);
+            var tasObtenerRoles = rolBl.ObtenerTodosAsync();
+            var usuarios = await tasBuscar;
+            ViewBag.Top = pUsuario.Top_Aux;
+            ViewBag.Roles = await tasObtenerRoles;
+            return View(usuarios);
         }
 
         // GET: UsuarioController/Details/5
@@ -18,44 +35,55 @@ namespace SysSeguridadG05.UIMVC.Controllers
         }
 
         // GET: UsuarioController/Create
-        public ActionResult Create()
+        public async Task<IActionResult> Create(IFormCollection collection)
         {
+            ViewBag.Roles = await rolBl.ObtenerTodosAsync();
+            ViewBag.Error = "";
             return View();
         }
 
         // POST: UsuarioController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> Create(Usuario pUsuario)
         {
             try
             {
+                int result = await usuarioBl.CrearAsync(pUsuario);
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch(Exception ex)
             {
-                return View();
+                ViewBag.Error = ex.Message;
+                ViewBag.Roles = await rolBl.ObtenerTodosAsync();
+                return View(pUsuario);
             }
         }
 
         // GET: UsuarioController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<IActionResult> Edit(Usuario pUsuario)
         {
-            return View();
+            var usuario = await usuarioBl.ObtenerPorIdAsync(pUsuario);
+            ViewBag.Roles = await rolBl.ObtenerTodosAsync();
+            ViewBag.Error = "" ;
+            return View(usuario);
         }
 
         // POST: UsuarioController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(int id, Usuario pUsuario)
         {
             try
             {
+                int result = await usuarioBl.ModificarAsync(pUsuario);
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch(Exception ex)
             {
-                return View();
+                ViewBag.Error = ex.Message;
+                ViewBag.Roles = await rolBl.ObtenerTodosAsync();
+                return View(pUsuario);
             }
         }
 

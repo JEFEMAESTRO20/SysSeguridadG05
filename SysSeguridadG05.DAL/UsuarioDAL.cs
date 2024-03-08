@@ -27,39 +27,38 @@ namespace SysSeguridadG05.DAL
         private static async Task<bool> ExisteLogin(Usuario pUsuario, DBContexto pDbContexto)            
         {
             bool result = false;
-            var loginUsuarioExiste = await pDbContexto.Usuarios.FirstOrDefaultAsync(a => a.Login == pUsuario.Login && a.Id != pUsuario.Id);
+            var loginUsuarioExiste = await pDbContexto.Usuario.FirstOrDefaultAsync(a => a.Login == pUsuario.Login && a.Id != pUsuario.Id);
             if (loginUsuarioExiste != null && loginUsuarioExiste.Id > 0 && loginUsuarioExiste.Login == pUsuario.Login)
                 result = true;
             return result;
         }
         #region "CRUD"
             public static async Task<int> GuardarAsync(Usuario pUsuario)
-        {
-            int result = 0;
-            try
-            {
-                using (var dbContexto = new DBContexto())
+            {   int result = 0;
+                try
                 {
-                    bool existeLogin = await ExisteLogin(pUsuario, dbContexto);
-                    if (existeLogin == false)
+                    using (var dbContexto = new DBContexto())
                     {
-                        pUsuario.FechaRegistro = DateTime.Now;
-                        EncriptarMD5(pUsuario);
-                        dbContexto.Add(pUsuario);
-                        result = await dbContexto.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        throw new Exception("Login ya existe");
+                        bool existeLogin = await ExisteLogin(pUsuario, dbContexto);
+                        if (existeLogin == false)
+                        {
+                            pUsuario.FechaRegistro = DateTime.Now;//Para guardar la fecha del servidor, automaticamente
+                            EncriptarMD5(pUsuario);
+                            dbContexto.Add(pUsuario);
+                            result = await dbContexto.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            throw new Exception("Login ya existe");
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                result = 0;
-                throw new Exception("Ocurrió un error externo");
-            }
-            return result;
+                catch (Exception ex)
+                {
+                    result = 0;
+                    throw new Exception("Ocurrió un error externo");
+                }
+                return result;
             }
         public static async Task<int> ModificarAsync(Usuario pUsuario)
         {
@@ -71,7 +70,7 @@ namespace SysSeguridadG05.DAL
                     bool existeLogin = await ExisteLogin(pUsuario, dbContexto);
                     if (existeLogin == false)
                     {
-                        var usuario = await dbContexto.Usuarios.FirstOrDefaultAsync(d => d.Id == pUsuario.Id);
+                        var usuario = await dbContexto.Usuario.FirstOrDefaultAsync(d => d.Id == pUsuario.Id);
                         usuario.IdRol = pUsuario.IdRol;
                         usuario.Nombre = pUsuario.Nombre;
                         usuario.Apellido = pUsuario.Apellido;
@@ -100,8 +99,8 @@ namespace SysSeguridadG05.DAL
             {
                 using (var dbContexto = new DBContexto())
                 {
-                    var usuario = await dbContexto.Usuarios.FirstOrDefaultAsync(f => f.Id == pUsuario.Id);
-                    dbContexto.Usuarios.Remove(usuario);
+                    var usuario = await dbContexto.Usuario.FirstOrDefaultAsync(f => f.Id == pUsuario.Id);
+                    dbContexto.Usuario.Remove(usuario);
                     result = await dbContexto.SaveChangesAsync();
                 }
             }
@@ -119,7 +118,7 @@ namespace SysSeguridadG05.DAL
             {
                 using (var dbContexto = new DBContexto())
                 {
-                    usuario = await dbContexto.Usuarios.FirstOrDefaultAsync(s => s.Id == pUsuario.Id);
+                    usuario = await dbContexto.Usuario.FirstOrDefaultAsync(s => s.Id == pUsuario.Id);
                 }
             }
             catch (Exception ex)
@@ -136,7 +135,7 @@ namespace SysSeguridadG05.DAL
             {
                 using (var dbContexto = new DBContexto())
                 {
-                    usuarios = await dbContexto.Usuarios.ToListAsync();
+                    usuarios = await dbContexto.Usuario.ToListAsync();
                 }
             }
             catch (Exception ex)
@@ -158,7 +157,9 @@ namespace SysSeguridadG05.DAL
                 pQuery = pQuery.Where(s => s.Apellido.Contains(pUsuario.Apellido));
             if (!string.IsNullOrWhiteSpace(pUsuario.Login))
                 pQuery = pQuery.Where(s => s.Login.Contains(pUsuario.Login));
-            if (pUsuario.FechaRegistro.Year > 1000)
+            if (pUsuario.Estatus > 0)
+                pQuery = pQuery.Where(s => s.Estatus == pUsuario.Estatus);
+            if (pUsuario.FechaRegistro.Year > 1000)//Formatear Fecha de registro
             {
                 DateTime fechaInicial = new DateTime(pUsuario.FechaRegistro.Year,
                     pUsuario.FechaRegistro.Month, pUsuario.FechaRegistro.Day, 0, 0, 0);
@@ -176,7 +177,7 @@ namespace SysSeguridadG05.DAL
             var usuarios = new List<Usuario>();
             using (var dbContexto = new DBContexto())
             {
-                var select = dbContexto.Usuarios.AsQueryable();
+                var select = dbContexto.Usuario.AsQueryable();
                 select = QuerySelect(select, pUsuario);
                 usuarios = await select.ToListAsync();
             }
@@ -186,23 +187,30 @@ namespace SysSeguridadG05.DAL
 
         public static async Task<List<Usuario>> BuscarIncluirRolAsync(Usuario pUsuario)
         {
-            var usuarios = new List<Usuario>();
-            using (var dbContexto = new DBContexto())
+            try
             {
-                var select = dbContexto.Usuarios.AsQueryable();
-                select = QuerySelect(select, pUsuario).Include(s => s.Rol).AsQueryable();
-                usuarios = await select.ToListAsync();
+                var usuarios = new List<Usuario>();
+                using (var dbContexto = new DBContexto())
+                {
+                    var select = dbContexto.Usuario.AsQueryable();
+                    select = QuerySelect(select, pUsuario).Include(s => s.Rol).AsQueryable();
+                    usuarios = await select.ToListAsync();
+                    return usuarios;
+                }
             }
-            return usuarios;
+            catch (Exception ex)
+            {
+                throw new Exception("Ocurrio un error interno");
+            }
+            
         }
-
         public static async Task<Usuario> LoginAsync(Usuario pUsuario)
         {
             var usuario = new Usuario();
             using (var dbContexto = new DBContexto())
             {
                 EncriptarMD5(pUsuario);
-                usuario = await dbContexto.Usuarios.FirstOrDefaultAsync(s => s.Login == pUsuario.Login &&
+                usuario = await dbContexto.Usuario.FirstOrDefaultAsync(s => s.Login == pUsuario.Login &&
                 s.Password == pUsuario.Password && s.Estatus == (byte) Estatus_Usuario.ACTIVO);
             }
             return usuario;
@@ -215,8 +223,8 @@ namespace SysSeguridadG05.DAL
             EncriptarMD5(usuarioPassAnt);
             using (var dbContexto = new DBContexto())
             {
-                var usuario = await dbContexto.Usuarios.FirstOrDefaultAsync(s => s.Id == pUsuario.Id);
-                if (usuarioPassAnt.Password == usuario.Password)
+                var usuario = await dbContexto.Usuario.FirstOrDefaultAsync(s => s.Id == pUsuario.Id);
+                if (usuarioPassAnt.Password == usuario.Password)//si la contraseña es correcta se realiza el if encriptando la contraseña
                 {
                     EncriptarMD5(pUsuario);
                     usuario.Password = usuarioPassAnt.Password;

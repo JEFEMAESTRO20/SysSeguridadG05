@@ -1,12 +1,13 @@
-﻿@model IEnumerable<SysSeguridadG05.EN.Rol>
+﻿@model IEnumerable<SysSeguridadG05.EN.Usuario>
 
 @{
     ViewData["Title"] = "Index";
     int numPage = 1;
     int numRegistro = 0;
-    int numRegistrosPorPage = 10;
+    int numRegistroPorPage = 10;
     int[] tops = { 10, 20, 50, 100, 500, 1000, 10000, -1 };
     int topActual = Convert.ToInt32(ViewBag.Top);
+    List<SysSeguridadG05.EN.Rol> roles = ViewBag.Roles as List<SysSeguridadG05.EN.Rol>;
 }
 
 <h1>Buscar Rol</h1>
@@ -16,12 +17,10 @@
         <form asp-action="Index">
             <div class="row">
                 <div class="col-md-4">
-                    <div class="form-group">
+                    <div form-group>
                         <label class="control-label">Nombre</label>
                         <input type="text" class="form-control" name="nombre" />
-
                     </div>
-
                 </div>
                 <div class="col-md-2">
                     <div class="form-control">
@@ -47,12 +46,8 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <div class="form-group">
-                        <input type="submit" value="Buscar" class="btn btn-primary" />
-                        <a asp-action="Create" class="btn btn-success">Crear</a>
-
-                    </div>
-
+                    <imput type="submit " value="Buscar" class="btn btn_primary" />
+                    <a asp-action="Create" class="btn btn-success">Crear</a>
                 </div>
             </div>
         </form>
@@ -63,28 +58,54 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.IdRol)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Nombre)
             </th>
-            <th colspan="3">Acciones</th>
+            <th>
+                @Html.DisplayNameFor(model => model.Apellido)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Login)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Estatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaRegistro)
+            </th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Nombre)
-                </td>
-                <td>
-                    @Html.ActionLink("Modificar", "Edit", new { Id=item.Id  }, new {@class ="btn btn-success"})
-                <td>
-                <td>
-                            @Html.ActionLink("Detalle", "Datails", new {  pId=item.Id }, new {@class ="btn btn-info"})
-                </td>
-                <td>
-                            @Html.ActionLink("Eliminar", "Delete", new {  Id=item.Id  }, new {@class="btn btn-danger"})
-                </td>
-            </tr>
-        }
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rol.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Apellido)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Login)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Estatus)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaRegistro)
+            </td>
+            <td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }, new {@class = "btn btn-succes"}) |
+                        @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }, new {@class = "btn btn-info"} )
+                        @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ }, new {@class = "btn btn-danger"}) 
+            </td>
+        </tr>
+}
     </tbody>
 </table>
